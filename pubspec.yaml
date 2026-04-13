@@ -41,6 +41,7 @@ dependencies:
   riverpod_annotation: ^4.0.2
   flutter_secure_storage: ^10.0.0
   flutter_dotenv: ^6.0.0
+  stomp_dart_client: ^3.0.1
 
 dev_dependencies:
   flutter_test:

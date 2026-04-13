@@ -8,6 +8,7 @@ import 'package:space_shift/features/properties/presentation/screens/property_li
 import '../../../../core/theme/theme_provider.dart';
 // Importa aquí otras pantallas que vayas a usar en las pestañas
 // import '../../../profile/presentation/screens/profile_screen.dart';
+import '../../chat/presentation/screens/bandeja_entrada_screen.dart';
 
 class MainLayoutScreen extends ConsumerStatefulWidget {
   const MainLayoutScreen({super.key});
@@ -23,8 +24,9 @@ class _MainLayoutScreenState extends ConsumerState<MainLayoutScreen> {
   // Lista de las pantallas que irán en cada pestaña
   final List<Widget> _screens = [
     const PropertyListScreen(), // Tu catálogo (Índice 0, el default)
-    const Center(child: Text('Pantalla de Favoritos')), // Índice 1
-    const Center(child: Text('Pantalla de Perfil')), // Índice 2
+    const BandejaEntradaScreen(), // Mensajes/Chats (Índice 1)
+    const Center(child: Text('Pantalla de Favoritos')), // Índice 2
+    const Center(child: Text('Pantalla de Perfil')), // Índice 3
   ];
 
   @override
@@ -68,6 +70,11 @@ class _MainLayoutScreenState extends ConsumerState<MainLayoutScreen> {
             icon: Icon(Icons.home_outlined, color: AppColors.lPrimary),
             selectedIcon: Icon(Icons.home, color: AppColors.lPrimary),
             label: 'Explorar',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.chat_bubble_outline, color: AppColors.lPrimary),
+            selectedIcon: Icon(Icons.chat_bubble, color: AppColors.lPrimary),
+            label: 'Mensajes',
           ),
           NavigationDestination(
             icon: Icon(Icons.favorite_outline, color: AppColors.lPrimary),
