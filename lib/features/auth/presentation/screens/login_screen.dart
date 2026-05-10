@@ -4,8 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import '../providers/auth_controller.dart';
 
-// 1. Cambiamos de ConsumerWidget a ConsumerStatefulWidget
-// Esto nos permite manejar la memoria de los campos de texto correctamente.
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
@@ -14,13 +12,11 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
-  // 2. Creamos los controladores para capturar lo que el usuario escribe
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
   @override
   void dispose() {
-    // 3. Es vital limpiar la memoria cuando cerramos la pantalla
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -37,24 +33,30 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         child: Column(
           children: [
             ShadInput(
-              controller: _emailController, // Conectamos el controlador
+              controller: _emailController,
               placeholder: const Text('Tu correo electrónico'),
-              keyboardType:
-                  TextInputType.emailAddress, // Muestra el teclado con el "@"
+              keyboardType: TextInputType.emailAddress,
             ),
             const SizedBox(height: 16),
             ShadInput(
-              controller: _passwordController, // Conectamos el controlador
+              controller: _passwordController,
               placeholder: const Text('Contraseña'),
               obscureText: true,
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () => context.push('/password-recovery'),
+                child: const Text('¿Olvidaste tu contraseña?'),
+              ),
+            ),
+            const SizedBox(height: 16),
             ShadButton(
               width: double.infinity,
               onPressed: authState.isLoading
                   ? null
                   : () async {
-                      // Opcional: Validación rápida para evitar peticiones vacías al servidor
                       if (_emailController.text.isEmpty ||
                           _passwordController.text.isEmpty) {
                         ShadToaster.of(context).show(
@@ -65,24 +67,19 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ),
                           ),
                         );
-                        return; // Detenemos la ejecución aquí
+                        return;
                       }
 
-                      // 4. Enviamos los datos reales capturados al Provider
                       final success = await ref
                           .read(authControllerProvider.notifier)
                           .login(
-                            _emailController.text
-                                .trim(), // trim() borra espacios en blanco por error
+                            _emailController.text.trim(),
                             _passwordController.text,
                           );
 
-                      // Regla de Flutter: siempre verificar si la pantalla sigue existiendo después de un 'await'
                       if (!context.mounted) return;
 
-                      // 5. Los famosos "Breads" (Toasts)
                       if (success) {
-                        // Toast de éxito
                         ShadToaster.of(context).show(
                           const ShadToast(
                             title: Text('¡Bienvenido!'),
@@ -93,7 +90,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         );
                         context.go('/home');
                       } else {
-                        // Rescatamos el mensaje de error exacto del estado de Riverpod
                         final errorMensaje =
                             ref
                                 .read(authControllerProvider)
@@ -101,7 +97,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 ?.toString() ??
                             'Credenciales incorrectas.';
 
-                        // Toast de error (Destructive usa colores rojos en Shadcn)
                         ShadToaster.of(context).show(
                           ShadToast.destructive(
                             title: const Text('Error de Autenticación'),

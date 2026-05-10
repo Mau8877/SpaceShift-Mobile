@@ -2,6 +2,7 @@ import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../features/auth/presentation/screens/login_screen.dart';
+import '../../features/auth/presentation/screens/password_recovery_screen.dart';
 import '../../features/home/presentation/main_layout_screen.dart';
 import '../../features/properties/domain/publicacion.dart';
 import '../../features/properties/presentation/screens/create_publication_screen.dart';
@@ -24,6 +25,10 @@ GoRouter appRouter(Ref ref) {
       GoRoute(
         path: '/login', 
         builder: (context, state) => const LoginScreen()
+      ),
+      GoRoute(
+        path: '/password-recovery',
+        builder: (context, state) => const PasswordRecoveryScreen(),
       ),
       GoRoute(
         path: '/create_publication',
