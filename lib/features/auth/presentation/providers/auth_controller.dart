@@ -1,5 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../data/auth_repository.dart';
+import '../../domain/register_request.dart';
 
 part 'auth_controller.g.dart';
 
@@ -14,6 +15,14 @@ class AuthController extends _$AuthController {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(
       () => ref.read(authRepositoryProvider).login(email, password),
+    );
+    return !state.hasError;
+  }
+
+  Future<bool> register(RegisterRequest request) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(
+      () => ref.read(authRepositoryProvider).register(request),
     );
     return !state.hasError;
   }
