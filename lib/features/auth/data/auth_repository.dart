@@ -54,6 +54,8 @@ class AuthRepository {
       data: {'correo': correo, 'codigo': codigo, 'nuevaPassword': nuevaPassword},
     );
     return response.data['mensaje'] ?? 'Contraseña actualizada';
+  Future<void> logout() async {
+    await _storage.clearToken();
   }
 }
 

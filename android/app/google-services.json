@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "771831287139",
+    "project_id": "spaceshift-87b19",
+    "storage_bucket": "spaceshift-87b19.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:771831287139:android:ace0fcad7f9f8e64669756",
+        "android_client_info": {
+          "package_name": "com.example.space_shift"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAWnqydV4AaWsxxDARrvlC_eUtzeCGTQus"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

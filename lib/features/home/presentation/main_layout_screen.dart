@@ -6,6 +6,7 @@ import 'package:space_shift/core/theme/app_theme.dart';
 import 'package:space_shift/features/properties/presentation/screens/property_list_screen.dart'
     show PropertyListScreen;
 
+import '../../../../core/services/notification_service.dart';
 import '../../../../core/theme/theme_provider.dart';
 import '../../chat/presentation/screens/bandeja_entrada_screen.dart';
 
@@ -17,6 +18,15 @@ class MainLayoutScreen extends ConsumerStatefulWidget {
 }
 
 class _MainLayoutScreenState extends ConsumerState<MainLayoutScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(notificationServiceProvider).checkInitialMessage();
+    });
+  }
+
+  // Índice para controlar qué pestaña está activa
   int _currentIndex = 0;
 
   final List<Widget> _screens = [

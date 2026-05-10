@@ -1,4 +1,8 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+import '../../../../core/network/notification_api.dart';
+import '../../../../core/services/notification_service.dart';
 import '../../data/auth_repository.dart';
 import '../../domain/register_request.dart';
 
@@ -16,6 +20,9 @@ class AuthController extends _$AuthController {
     state = await AsyncValue.guard(
       () => ref.read(authRepositoryProvider).login(email, password),
     );
+    if (!state.hasError) {
+      await ref.read(notificationServiceProvider).initialize();
+    }
     return !state.hasError;
   }
 
@@ -49,5 +56,11 @@ class AuthController extends _$AuthController {
       () => ref.read(authRepositoryProvider).cambiarPassword(correo, codigo, nuevaPassword),
     );
     return !state.hasError;
+  Future<void> logout() async {
+    final fcmToken = await FirebaseMessaging.instance.getToken();
+    if (fcmToken != null) {
+      await ref.read(notificationApiProvider).revokeToken(fcmToken);
+    }
+    await ref.read(authRepositoryProvider).logout();
   }
 }
