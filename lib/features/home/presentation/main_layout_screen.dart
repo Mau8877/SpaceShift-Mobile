@@ -8,7 +8,7 @@ import 'package:space_shift/features/properties/presentation/screens/property_li
 import '../../../../core/services/notification_service.dart';
 import '../../../../core/theme/theme_provider.dart';
 // Importa aquí otras pantallas que vayas a usar en las pestañas
-// import '../../../profile/presentation/screens/profile_screen.dart';
+import '../../auth/presentation/screens/profile_screen.dart';
 import '../../chat/presentation/screens/bandeja_entrada_screen.dart';
 
 class MainLayoutScreen extends ConsumerStatefulWidget {
@@ -35,7 +35,7 @@ class _MainLayoutScreenState extends ConsumerState<MainLayoutScreen> {
     const PropertyListScreen(), // Tu catálogo (Índice 0, el default)
     const BandejaEntradaScreen(), // Mensajes/Chats (Índice 1)
     const Center(child: Text('Pantalla de Favoritos')), // Índice 2
-    const Center(child: Text('Pantalla de Perfil')), // Índice 3
+    const ProfileScreen(), // Pantalla de Perfil real (Índice 3)
   ];
 
   @override

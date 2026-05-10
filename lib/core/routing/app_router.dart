@@ -8,6 +8,7 @@ import '../../features/properties/presentation/screens/create_publication_screen
 import '../../features/properties/presentation/screens/property_detail_screen.dart';
 import '../../features/properties/presentation/screens/property_list_screen.dart';
 import '../../features/chat/presentation/screens/chat_detail_screen.dart';
+import '../../features/properties/presentation/screens/mis_inmuebles_screen.dart';
 
 part 'app_router.g.dart';
 
@@ -27,7 +28,14 @@ GoRouter appRouter(Ref ref) {
       ),
       GoRoute(
         path: '/create_publication',
-        builder: (context, state) => const CreatePublicationScreen(),
+        builder: (context, state) {
+           final pub = state.extra as Publicacion?;
+           return CreatePublicationScreen(publicacion: pub);
+        },
+      ),
+      GoRoute(
+        path: '/mis_inmuebles',
+        builder: (context, state) => const MisInmueblesScreen(),
       ),
       GoRoute(
         path: '/property_detail',

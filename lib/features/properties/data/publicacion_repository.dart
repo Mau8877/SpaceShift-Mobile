@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -19,8 +20,30 @@ class PublicacionRepository {
     return Publicacion.fromJson(response.data);
   }
 
+  Future<List<String>> uploadImages(List<File> files) async {
+    final formData = FormData();
+    for (var file in files) {
+      formData.files.add(MapEntry(
+        'files',
+        await MultipartFile.fromFile(file.path),
+      ));
+    }
+
+    final response = await _dio.post(
+      '/upload/imagenes',
+      data: formData,
+    );
+    
+    return List<String>.from(response.data);
+  }
+
   Future<List<Publicacion>> getPublicaciones() async {
     final response = await _dio.get('/publicaciones');
+    return (response.data as List).map((p) => Publicacion.fromJson(p)).toList();
+  }
+
+  Future<List<Publicacion>> getMisPublicaciones() async {
+    final response = await _dio.get('/publicaciones/mis-publicaciones');
     return (response.data as List).map((p) => Publicacion.fromJson(p)).toList();
   }
 
