@@ -3,7 +3,10 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/password_recovery_screen.dart';
+import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/home/presentation/main_layout_screen.dart';
+import '../../features/profile/presentation/screens/profile_edit_screen.dart';
+import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/properties/domain/publicacion.dart';
 import '../../features/properties/presentation/screens/create_publication_screen.dart';
 import '../../features/properties/presentation/screens/property_detail_screen.dart';
@@ -20,15 +23,27 @@ GoRouter appRouter(Ref ref) {
       GoRoute(
         path: '/home',
         builder: (context, state) =>
-            const MainLayoutScreen(), // Ahora apuntamos al Layout
+            const MainLayoutScreen(),
       ),
       GoRoute(
         path: '/login', 
         builder: (context, state) => const LoginScreen()
       ),
       GoRoute(
+        path: '/register',
+        builder: (context, state) => const RegisterScreen(),
+      ),
+      GoRoute(
         path: '/password-recovery',
         builder: (context, state) => const PasswordRecoveryScreen(),
+      ),
+      GoRoute(
+        path: '/profile',
+        builder: (context, state) => const ProfileScreen(),
+      ),
+      GoRoute(
+        path: '/profile-edit',
+        builder: (context, state) => const ProfileEditScreen(),
       ),
       GoRoute(
         path: '/create_publication',
