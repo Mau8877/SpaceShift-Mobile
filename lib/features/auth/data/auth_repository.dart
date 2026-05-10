@@ -22,6 +22,10 @@ class AuthRepository {
     final token = response.data['token'];
     await _storage.saveToken(token);
   }
+
+  Future<void> logout() async {
+    await _storage.clearToken();
+  }
 }
 
 @riverpod
