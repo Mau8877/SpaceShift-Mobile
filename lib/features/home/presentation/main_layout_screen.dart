@@ -9,7 +9,7 @@ import 'package:space_shift/features/properties/presentation/screens/property_li
 import '../../../../core/services/notification_service.dart';
 import '../../../../core/theme/theme_provider.dart';
 // Importa aquí otras pantallas que vayas a usar en las pestañas
-import '../../auth/presentation/screens/profile_screen.dart';
+import '../../profile/presentation/screens/profile_screen.dart';
 import '../../chat/presentation/screens/bandeja_entrada_screen.dart';
 
 class MainLayoutScreen extends ConsumerStatefulWidget {

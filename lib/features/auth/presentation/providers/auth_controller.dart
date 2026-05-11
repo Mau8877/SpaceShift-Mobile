@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -56,11 +57,23 @@ class AuthController extends _$AuthController {
       () => ref.read(authRepositoryProvider).cambiarPassword(correo, codigo, nuevaPassword),
     );
     return !state.hasError;
+  }
+
   Future<void> logout() async {
-    final fcmToken = await FirebaseMessaging.instance.getToken();
-    if (fcmToken != null) {
-      await ref.read(notificationApiProvider).revokeToken(fcmToken);
+    // Capturamos las referencias ANTES de los awaits para evitar el error de "disposed ref"
+    final notificationApi = ref.read(notificationApiProvider);
+    final authRepository = ref.read(authRepositoryProvider);
+
+    try {
+      final fcmToken = await FirebaseMessaging.instance.getToken();
+      if (fcmToken != null) {
+        await notificationApi.revokeToken(fcmToken);
+      }
+    } catch (e) {
+      // Si falla lo de Firebase/Notificaciones, igual queremos que cierre sesión
+      debugPrint('Error revocando token FCM: $e');
     }
-    await ref.read(authRepositoryProvider).logout();
+    
+    await authRepository.logout();
   }
 }

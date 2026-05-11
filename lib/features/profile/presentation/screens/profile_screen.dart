@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import '../providers/perfil_controller.dart';
+import '../../../auth/presentation/providers/auth_controller.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -70,10 +71,27 @@ class ProfileScreen extends ConsumerWidget {
                   ],
                 ),
                 const SizedBox(height: 24),
+                ShadButton.outline(
+                  width: double.infinity,
+                  onPressed: () => context.push('/mis_inmuebles'),
+                  child: const Text('Mis Inmuebles'),
+                ),
+                const SizedBox(height: 12),
                 ShadButton(
                   width: double.infinity,
                   onPressed: () => context.push('/profile-edit'),
                   child: const Text('Editar Perfil'),
+                ),
+                const SizedBox(height: 40),
+                ShadButton.destructive(
+                  width: double.infinity,
+                  onPressed: () async {
+                    await ref.read(authControllerProvider.notifier).logout();
+                    if (context.mounted) {
+                      context.go('/login');
+                    }
+                  },
+                  child: const Text('Cerrar Sesión'),
                 ),
               ],
             ),
