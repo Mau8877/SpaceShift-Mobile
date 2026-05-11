@@ -19,8 +19,26 @@ class PublicacionRepository {
     return Publicacion.fromJson(response.data);
   }
 
-  Future<List<Publicacion>> getPublicaciones() async {
-    final response = await _dio.get('/publicaciones');
+  Future<List<Publicacion>> getPublicaciones({
+    String? transactionType,
+    String? location,
+    String? propertyType,
+    double? minPrice,
+    double? maxPrice,
+  }) async {
+    final queryParams = <String, dynamic>{};
+    
+    if (transactionType != null) queryParams['tipoTransaccion'] = transactionType;
+    if (location != null) queryParams['ubicacion'] = location;
+    if (propertyType != null) queryParams['tipoInmueble'] = propertyType;
+    if (minPrice != null) queryParams['minPrecio'] = minPrice;
+    if (maxPrice != null) queryParams['maxPrecio'] = maxPrice;
+
+    final response = await _dio.get(
+      '/publicaciones',
+      queryParameters: queryParams,
+    );
+    
     return (response.data as List).map((p) => Publicacion.fromJson(p)).toList();
   }
 
@@ -39,6 +57,21 @@ class PublicacionRepository {
 
   Future<void> deletePublicacion(String id) async {
     await _dio.delete('/publicaciones/$id');
+  }
+
+  Future<List<String>> getTiposTransaccion() async {
+    final response = await _dio.get('/publicaciones/tipos-transaccion');
+    return List<String>.from(response.data);
+  }
+
+  Future<List<String>> getTiposInmueble() async {
+    final response = await _dio.get('/inmuebles/tipos');
+    return List<String>.from(response.data);
+  }
+
+  Future<List<String>> getUbicaciones() async {
+    final response = await _dio.get('/inmuebles/ubicaciones');
+    return List<String>.from(response.data);
   }
 }
 
