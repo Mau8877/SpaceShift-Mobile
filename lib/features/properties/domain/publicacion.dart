@@ -40,7 +40,7 @@ class Publicacion {
       tipoTransaccion: json['tipoTransaccion'] ?? 'VENTA',
       precio: (json['precio'] ?? 0).toDouble(),
       moneda: json['moneda'] ?? 'USD',
-      estadoPublicacion: json['estadoPublicacion'] ?? 'ACTIVA',
+      estadoPublicacion: json['estadoPublicacion'] ?? 'DISPONIBLE',
       imagenesUrls: (json['imagenes'] as List?)?.map((img) => img['urlImage'] as String).toList() ?? 
                     List<String>.from(json['imagenesUrls'] ?? []),
       inmueble: json['inmueble'] != null ? Inmueble.fromJson(json['inmueble']) : null,
