@@ -53,3 +53,5 @@ app.*.map.json
 GUIA_DESARROLLO.md
 chat_implementation_plan.md
 resumen_implementacion_chat.md
+.agents
+skills-lock.json

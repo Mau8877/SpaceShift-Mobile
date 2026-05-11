@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:space_shift/core/theme/app_theme.dart';
 import 'package:space_shift/features/properties/presentation/screens/property_list_screen.dart'
@@ -30,13 +31,23 @@ class _MainLayoutScreenState extends ConsumerState<MainLayoutScreen> {
   // Índice para controlar qué pestaña está activa
   int _currentIndex = 0;
 
-  // Lista de las pantallas que irán en cada pestaña
   final List<Widget> _screens = [
-    const PropertyListScreen(), // Tu catálogo (Índice 0, el default)
-    const BandejaEntradaScreen(), // Mensajes/Chats (Índice 1)
-    const Center(child: Text('Pantalla de Favoritos')), // Índice 2
-    const ProfileScreen(), // Pantalla de Perfil real (Índice 3)
+    const PropertyListScreen(),
+    const BandejaEntradaScreen(),
+    const Center(child: Text('Pantalla de Favoritos')),
+    const Center(child: Text('Pantalla de Perfil')),
+    const ProfileScreen(),
   ];
+
+  void _onTabSelected(int index) {
+    if (index == 3) {
+      context.push('/profile');
+    } else {
+      setState(() {
+        _currentIndex = index;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -68,11 +79,7 @@ class _MainLayoutScreenState extends ConsumerState<MainLayoutScreen> {
       // Usamos el NavigationBar nativo de Material 3 que es súper elegante
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
-        onDestinationSelected: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
+        onDestinationSelected: _onTabSelected,
 
         destinations: const [
           NavigationDestination(
