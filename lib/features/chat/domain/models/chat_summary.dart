@@ -5,6 +5,7 @@ class ChatSummary {
   final String nombreOtroUsuario;
   final String fotoOtroUsuario;
   final DateTime ultimoMensajeFecha;
+  final int mensajesSinLeer;
 
   ChatSummary({
     required this.conversacionId,
@@ -13,6 +14,7 @@ class ChatSummary {
     required this.nombreOtroUsuario,
     required this.fotoOtroUsuario,
     required this.ultimoMensajeFecha,
+    this.mensajesSinLeer = 0,
   });
 
   factory ChatSummary.fromJson(Map<String, dynamic> json) {
@@ -22,9 +24,10 @@ class ChatSummary {
       otroUsuarioId: json['otroUsuarioId']?.toString() ?? '',
       nombreOtroUsuario: json['nombreOtroUsuario']?.toString() ?? 'Usuario',
       fotoOtroUsuario: json['fotoOtroUsuario']?.toString() ?? '',
-      ultimoMensajeFecha: json['ultimoMensajeFecha'] != null 
-          ? DateTime.tryParse(json['ultimoMensajeFecha'].toString()) ?? DateTime.now() 
+      ultimoMensajeFecha: json['ultimoMensajeFecha'] != null
+          ? DateTime.tryParse(json['ultimoMensajeFecha'].toString()) ?? DateTime.now()
           : DateTime.now(),
+      mensajesSinLeer: (json['mensajesSinLeer'] as int?) ?? 0,
     );
   }
 }

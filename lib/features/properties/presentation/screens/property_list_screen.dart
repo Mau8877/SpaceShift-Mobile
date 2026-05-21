@@ -67,9 +67,13 @@ class PropertyListScreen extends ConsumerWidget {
                             scrollDirection: Axis.horizontal,
                             itemCount: finDeSemana.length,
                             itemBuilder: (context, index) {
-                              return PropertyCard(
-                                publicacion: finDeSemana[index],
-                                onTap: () => context.push('/property_detail', extra: finDeSemana[index]),
+                              return Container(
+                                width: 180,
+                                margin: const EdgeInsets.only(right: 16),
+                                child: PropertyCard(
+                                  publicacion: finDeSemana[index],
+                                  onTap: () => context.push('/property_detail', extra: finDeSemana[index]),
+                                ),
                               );
                             },
                           ),
@@ -95,9 +99,13 @@ class PropertyListScreen extends ConsumerWidget {
                             itemCount: moda.isNotEmpty ? moda.length : finDeSemana.length,
                             itemBuilder: (context, index) {
                               final pub = moda.isNotEmpty ? moda[index] : finDeSemana[index];
-                              return PropertyCard(
-                                publicacion: pub,
-                                onTap: () => context.push('/property_detail', extra: pub),
+                              return Container(
+                                width: 180,
+                                margin: const EdgeInsets.only(right: 16),
+                                child: PropertyCard(
+                                  publicacion: pub,
+                                  onTap: () => context.push('/property_detail', extra: pub),
+                                ),
                               );
                             },
                           ),

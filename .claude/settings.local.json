@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Force)",
+      "Bash(Select-Object -First 30)",
+      "Read(//c/Users/PC/Desktop/SW1/**)",
+      "Bash(xargs ls -la)",
+      "PowerShell(tree \"C:\\\\Users\\\\PC\\\\Desktop\\\\SW1\\\\SpaceShift-Frontend\\\\src\" -L 3)",
+      "PowerShell(head -100)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\PC\\\\Desktop\\\\SW1\\\\SpaceShift-Backend\\\\src\\\\main\\\\java\\\\com\\\\sw\\\\api\" -Recurse -File -Filter \"*.java\")",
+      "Bash(Select-Object FullName)",
+      "Bash(xargs grep -l \"StateChange\\\\|Connected\\\\|Disconnect\")",
+      "Bash(xargs grep -l \"estadoConexion\\\\|estado_conexion\")",
+      "Bash(xargs grep -l \"@EventListener\\\\|SessionConnectEvent\\\\|SessionDisconnect\")",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\PC\\\\Desktop\\\\SW1\\\\SpaceShift-Backend\\\\src\\\\main\\\\java\\\\com\\\\sw\\\\api\" -Recurse -Filter \"*.java\")",
+      "Bash(Select-Object -First 20)"
+    ]
+  }
+}

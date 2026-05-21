@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../domain/publicacion.dart';
+import '../providers/favoritos_provider.dart';
 
-class PropertyCard extends StatelessWidget {
+class PropertyCard extends ConsumerWidget {
   final Publicacion publicacion;
   final VoidCallback onTap;
 
@@ -15,7 +17,10 @@ class PropertyCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Escuchar cambios en la lista de favoritos
+    ref.watch(favoritosProvider);
+    final isFavorite = ref.read(favoritosProvider.notifier).isFavorito(publicacion.id);
     // Tomamos la primera imagen o un placeholder en línea
     final imageUrl =
         publicacion.imagenesUrls.isNotEmpty
@@ -31,7 +36,7 @@ class PropertyCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: 180,
-        margin: const EdgeInsets.only(right: 16),
+        margin: const EdgeInsets.only(bottom: 16),
         decoration: BoxDecoration(
           color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(12),
@@ -70,16 +75,21 @@ class PropertyCard extends StatelessWidget {
                 Positioned(
                   top: 8,
                   right: 8,
-                  child: Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.favorite_border,
-                      size: 20,
-                      color: Colors.black,
+                  child: GestureDetector(
+                    onTap: () {
+                      ref.read(favoritosProvider.notifier).toggleFavorito(publicacion);
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        isFavorite ? Icons.favorite : Icons.favorite_border,
+                        size: 20,
+                        color: isFavorite ? Colors.red : Colors.black,
+                      ),
                     ),
                   ),
                 ),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 
 import '../../domain/publicacion.dart';
 
@@ -16,45 +18,67 @@ class PropertyDetailScreen extends StatelessWidget {
     final inmueble = publicacion.inmueble;
     final ubicacion = inmueble?.ubicacion;
     
-    final imageUrl =
-        publicacion.imagenesUrls.isNotEmpty
-            ? publicacion.imagenesUrls.first
-            : 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?q=80&w=600&auto=format&fit=crop';
+    // Coordenadas para el mapa
+    final lat = double.tryParse(ubicacion?.latitud ?? '') ?? 0;
+    final lng = double.tryParse(ubicacion?.longitud ?? '') ?? 0;
+    final hasLocation = lat != 0 && lng != 0;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Detalles de la Propiedad'),
+        title: Text(publicacion.titulo, style: const TextStyle(fontSize: 18)),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        foregroundColor: ShadTheme.of(context).colorScheme.foreground,
       ),
+      extendBodyBehindAppBar: true,
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Gran Imagen Central
-            Image.network(
-              imageUrl,
-              height: 250,
-              width: double.infinity,
-              fit: BoxFit.cover,
-            ),
+            // Galería de Imágenes (Carrusel simple)
+            _buildImageGallery(context),
             
             Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(20.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Precio y Tipo
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '${publicacion.moneda} ${publicacion.precio.toStringAsFixed(0)}',
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: ShadTheme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                      ShadBadge.secondary(
+                        child: Text(publicacion.tipoTransaccion),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  
+                  // Título
                   Text(
                     publicacion.titulo,
                     style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                   const SizedBox(height: 8),
                   
+                  // Ubicación Texto
                   if (ubicacion != null)
                     Row(
                       children: [
-                        const Icon(Icons.location_on, color: Colors.red),
+                        Icon(Icons.location_on_outlined, 
+                             size: 18, 
+                             color: ShadTheme.of(context).colorScheme.mutedForeground),
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
@@ -69,31 +93,72 @@ class PropertyDetailScreen extends StatelessWidget {
                     
                   const SizedBox(height: 24),
                   
-                  // Información Crítica (Tarjetitas)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _buildInfoBadge(context, Icons.bed, '${inmueble?.habitaciones ?? 0} Hab.'),
-                      _buildInfoBadge(context, Icons.bathtub, '${inmueble?.banos ?? 0} Baños'),
-                      _buildInfoBadge(context, Icons.square_foot, '${inmueble?.areaConstruida ?? 0} m²'),
-                      _buildInfoBadge(context, Icons.attach_money, '${publicacion.precio}'),
-                    ],
-                  ),
+                  // Grid de Atributos principales
+                  _buildAttributesGrid(context),
                   
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 32),
                   
+                  // Descripción
                   const Text(
-                    'Descripción General',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    'Descripción',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 12),
                   Text(
                     publicacion.descripcionGeneral,
-                    style: const TextStyle(fontSize: 16),
+                    style: TextStyle(
+                      fontSize: 16, 
+                      height: 1.5,
+                      color: ShadTheme.of(context).colorScheme.foreground.withOpacity(0.8),
+                    ),
                   ),
+                  
+                  const SizedBox(height: 32),
+                  
+                  // MAPA DE UBICACIÓN
+                  const Text(
+                    'Ubicación en el mapa',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 16),
+                  if (hasLocation)
+                    Container(
+                      height: 220,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: Colors.grey.shade200),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: FlutterMap(
+                          options: MapOptions(
+                            initialCenter: LatLng(lat, lng),
+                            initialZoom: 15,
+                            interactionOptions: const InteractionOptions(flags: InteractiveFlag.all & ~InteractiveFlag.rotate),
+                          ),
+                          children: [
+                            TileLayer(
+                              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                              userAgentPackageName: 'com.spaceshift.app.mobile.v1',
+                            ),
+                            MarkerLayer(
+                              markers: [
+                                Marker(
+                                  point: LatLng(lat, lng),
+                                  width: 40,
+                                  height: 40,
+                                  child: const Icon(Icons.location_on, color: Colors.red, size: 40),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  else
+                    const Center(child: Text('Ubicación no disponible en el mapa')),
+                  
+                  const SizedBox(height: 100), // Espacio para el botón inferior
                 ],
               ),
             ),
@@ -101,37 +166,24 @@ class PropertyDetailScreen extends StatelessWidget {
         ),
       ),
       
-      // Bottom Navigation flotante con el Botón grande
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.all(16.0),
-        decoration: BoxDecoration(
-          color: Theme.of(context).scaffoldBackgroundColor,
-          boxShadow: const [
-            BoxShadow(
-              color: Colors.black12,
-              blurRadius: 10,
-              offset: Offset(0, -5),
-            ),
-          ],
-        ),
+      // Acción flotante premium
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
         child: ShadButton(
+          size: ShadButtonSize.lg,
+          width: double.infinity,
           onPressed: () {
-            // Acción simulada del tour
-            ShadToaster.of(context).show(
-              const ShadToast(
-                description: Text('Solicitud de tour enviada al sistema.'),
-              ),
+             ShadToaster.of(context).show(
+              const ShadToast(description: Text('Iniciando contacto con el anunciante...')),
             );
           },
           child: const Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.vrpano),
-              SizedBox(width: 8),
-              Text(
-                'Realizar tour',
-                style: TextStyle(fontSize: 18),
-              ),
+              Icon(Icons.chat_bubble_outline),
+              SizedBox(width: 10),
+              Text('Contactar ahora', style: TextStyle(fontSize: 16)),
             ],
           ),
         ),
@@ -139,22 +191,61 @@ class PropertyDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoBadge(BuildContext context, IconData icon, String label) {
+  Widget _buildImageGallery(BuildContext context) {
+    final images = publicacion.imagenesUrls;
+    if (images.isEmpty) {
+      return Container(
+        height: 350,
+        color: Colors.grey.shade200,
+        child: const Center(child: Icon(Icons.image_not_supported, size: 50)),
+      );
+    }
+
+    return SizedBox(
+      height: 380,
+      child: PageView.builder(
+        itemCount: images.length,
+        itemBuilder: (context, index) {
+          return Image.network(
+            images[index],
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) => Container(
+              color: Colors.grey.shade100,
+              child: const Icon(Icons.broken_image),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildAttributesGrid(BuildContext context) {
+    final inmueble = publicacion.inmueble;
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: ShadTheme.of(context).colorScheme.secondary.withOpacity(0.4),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _attributeItem(Icons.bed_outlined, '${inmueble?.habitaciones ?? 0}', 'Hab.'),
+          _attributeItem(Icons.bathtub_outlined, '${inmueble?.banos ?? 0}', 'Baños'),
+          _attributeItem(Icons.square_foot_outlined, '${inmueble?.areaConstruida ?? 0}', 'm²'),
+          _attributeItem(Icons.directions_car_outlined, '${inmueble?.garajes ?? 0}', 'Gar.'),
+        ],
+      ),
+    );
+  }
+
+  Widget _attributeItem(IconData icon, String value, String label) {
     return Column(
       children: [
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: ShadTheme.of(context).colorScheme.secondary,
-            shape: BoxShape.circle,
-          ),
-          child: Icon(icon, color: ShadTheme.of(context).colorScheme.primary),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          label,
-          style: const TextStyle(fontWeight: FontWeight.w500),
-        ),
+        Icon(icon, size: 24),
+        const SizedBox(height: 6),
+        Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
       ],
     );
   }
