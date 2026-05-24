@@ -166,55 +166,81 @@ class ProfileScreen extends ConsumerWidget {
               color: theme.colorScheme.primary.withValues(alpha: 0.2),
             ),
           ),
-          child: Row(
+          child: Column(
             children: [
-              Icon(
-                Icons.token,
-                color: theme.colorScheme.primary,
-                size: 28,
+              Row(
+                children: [
+                  Icon(
+                    Icons.token,
+                    color: theme.colorScheme.primary,
+                    size: 28,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Saldo Disponible',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                          ),
+                        ),
+                        saldoAsync.when(
+                          data: (saldo) => Text(
+                            '${saldo?.saldoCreditos ?? 0} SST',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: theme.colorScheme.primary,
+                            ),
+                          ),
+                          loading: () => const SizedBox(
+                            height: 18,
+                            width: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                          error: (_, __) => const Text(
+                            '0 SST',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  ShadButton.outline(
+                    onPressed: () => context.push('/buy-credits'),
+                    size: ShadButtonSize.sm,
+                    child: const Text('Comprar SST'),
+                  ),
+                ],
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              const Divider(height: 24),
+              GestureDetector(
+                onTap: () => context.push('/credit-history'),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      'Saldo Disponible',
+                    Text(
+                      'Ver historial de transacciones',
                       style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: theme.colorScheme.primary,
                       ),
                     ),
-                    saldoAsync.when(
-                      data: (saldo) => Text(
-                        '${saldo?.saldoCreditos ?? 0} SST',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: theme.colorScheme.primary,
-                        ),
-                      ),
-                      loading: () => const SizedBox(
-                        height: 18,
-                        width: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      ),
-                      error: (_, __) => const Text(
-                        '0 SST',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey,
-                        ),
-                      ),
+                    Icon(
+                      Icons.arrow_forward_ios,
+                      size: 12,
+                      color: theme.colorScheme.primary,
                     ),
                   ],
                 ),
-              ),
-              ShadButton.outline(
-                onPressed: () => context.push('/buy-credits'),
-                size: ShadButtonSize.sm,
-                child: const Text('Comprar SST'),
               ),
             ],
           ),

@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import '../../domain/paquete_model.dart';
-import '../../domain/transaccion_model.dart';
 import '../providers/tokens_controller.dart';
 
 class BuyCreditsScreen extends ConsumerWidget {
@@ -13,13 +12,12 @@ class BuyCreditsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final saldoAsync = ref.watch(saldoControllerProvider);
     final paquetesAsync = ref.watch(paquetesCreditoProvider);
-    final historialAsync = ref.watch(historialTransaccionesProvider);
 
     final theme = ShadTheme.of(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Créditos SpaceShift'),
+        title: const Text('Comprar Créditos'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.pop(),
@@ -29,7 +27,6 @@ class BuyCreditsScreen extends ConsumerWidget {
         onRefresh: () async {
           ref.invalidate(saldoControllerProvider);
           ref.invalidate(paquetesCreditoProvider);
-          ref.invalidate(historialTransaccionesProvider);
         },
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -71,24 +68,6 @@ class BuyCreditsScreen extends ConsumerWidget {
                     child: Text('Error al cargar paquetes: $err'),
                   ),
                 ),
-              ),
-              const SizedBox(height: 32),
-
-              // 4. Título Sección Historial
-              Text(
-                'Historial de Transacciones',
-                style: theme.textTheme.large.copyWith(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                ),
-              ),
-              const SizedBox(height: 12),
-
-              // 5. Historial de Transacciones
-              historialAsync.when(
-                data: (transacciones) => _buildHistorialList(context, transacciones, theme),
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (err, _) => Text('Error al cargar el historial: $err'),
               ),
             ],
           ),
@@ -275,88 +254,6 @@ class BuyCreditsScreen extends ConsumerWidget {
                     child: const Text('Comprar'),
                   ),
                 ],
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildHistorialList(
-      BuildContext context, List<TransaccionCredito> transacciones, ShadThemeData theme) {
-    if (transacciones.isEmpty) {
-      return Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.muted.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: const Center(
-          child: Text(
-            'Aún no registras transacciones de créditos.',
-            style: TextStyle(color: Colors.grey),
-          ),
-        ),
-      );
-    }
-
-    return ListView.separated(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: transacciones.length,
-      separatorBuilder: (_, __) => Divider(color: theme.colorScheme.border),
-      itemBuilder: (context, index) {
-        final trans = transacciones[index];
-        final isPositive = trans.cantidad > 0;
-        final color = isPositive ? Colors.green : Colors.redAccent;
-        final sign = isPositive ? '+' : '';
-
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  isPositive ? Icons.add_circle_outline : Icons.remove_circle_outline,
-                  color: color,
-                  size: 20,
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      trans.descripcion ?? 'Transacción de Créditos',
-                      style: theme.textTheme.large.copyWith(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Tipo: ${trans.tipo}',
-                      style: theme.textTheme.muted.copyWith(fontSize: 11),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 12),
-              Text(
-                '$sign${trans.cantidad} SST',
-                style: TextStyle(
-                  color: color,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 15,
-                ),
               ),
             ],
           ),
