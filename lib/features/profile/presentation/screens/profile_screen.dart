@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import '../providers/perfil_controller.dart';
 import '../../../auth/presentation/providers/auth_controller.dart';
+import '../../../tokens/presentation/providers/tokens_controller.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -71,6 +72,8 @@ class ProfileScreen extends ConsumerWidget {
                   ],
                 ),
                 const SizedBox(height: 24),
+                _buildWalletSection(context, ref),
+                const SizedBox(height: 24),
                 ShadButton.outline(
                   width: double.infinity,
                   onPressed: () => context.push('/mis_inmuebles'),
@@ -134,6 +137,113 @@ class ProfileScreen extends ConsumerWidget {
             borderRadius: BorderRadius.circular(12),
           ),
           child: Column(children: items),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildWalletSection(BuildContext context, WidgetRef ref) {
+    final saldoAsync = ref.watch(saldoControllerProvider);
+    final theme = ShadTheme.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Monedero de Créditos',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.primary.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: theme.colorScheme.primary.withValues(alpha: 0.2),
+            ),
+          ),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.token,
+                    color: theme.colorScheme.primary,
+                    size: 28,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Saldo Disponible',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                          ),
+                        ),
+                        saldoAsync.when(
+                          data: (saldo) => Text(
+                            '${saldo?.saldoCreditos ?? 0} SST',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: theme.colorScheme.primary,
+                            ),
+                          ),
+                          loading: () => const SizedBox(
+                            height: 18,
+                            width: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                          error: (_, __) => const Text(
+                            '0 SST',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  ShadButton.outline(
+                    onPressed: () => context.push('/buy-credits'),
+                    size: ShadButtonSize.sm,
+                    child: const Text('Comprar SST'),
+                  ),
+                ],
+              ),
+              const Divider(height: 24),
+              GestureDetector(
+                onTap: () => context.push('/credit-history'),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Ver historial de transacciones',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
+                    Icon(
+                      Icons.arrow_forward_ios,
+                      size: 12,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );
