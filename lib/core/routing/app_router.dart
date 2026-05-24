@@ -13,6 +13,7 @@ import '../../features/properties/presentation/screens/property_detail_screen.da
 import '../../features/properties/presentation/screens/property_list_screen.dart';
 import '../../features/chat/presentation/screens/chat_detail_screen.dart';
 import '../../features/properties/presentation/screens/mis_inmuebles_screen.dart';
+import '../../features/tokens/presentation/screens/buy_credits_screen.dart';
 
 part 'app_router.g.dart';
 
@@ -45,6 +46,10 @@ GoRouter appRouter(Ref ref) {
       GoRoute(
         path: '/profile-edit',
         builder: (context, state) => const ProfileEditScreen(),
+      ),
+      GoRoute(
+        path: '/buy-credits',
+        builder: (context, state) => const BuyCreditsScreen(),
       ),
       GoRoute(
         path: '/create_publication',

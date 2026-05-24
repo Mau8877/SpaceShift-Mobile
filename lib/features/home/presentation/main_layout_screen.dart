@@ -12,6 +12,7 @@ import '../../../../core/theme/theme_provider.dart';
 import '../../profile/presentation/screens/profile_screen.dart';
 import '../../chat/presentation/screens/bandeja_entrada_screen.dart';
 import '../../properties/presentation/screens/favoritos_screen.dart';
+import '../../tokens/presentation/providers/tokens_controller.dart';
 
 class MainLayoutScreen extends ConsumerStatefulWidget {
   const MainLayoutScreen({super.key});
@@ -60,6 +61,9 @@ class _MainLayoutScreenState extends ConsumerState<MainLayoutScreen> {
       appBar: AppBar(
         title: const Text('SpaceShift'),
         actions: [
+          // Mostrar los créditos al lado del botón de cambio de tema
+          _buildCreditsPill(context, ref),
+          const SizedBox(width: 8),
           // Botón para cambiar el tema
           ShadButton.ghost(
             child: Icon(isDark ? Icons.light_mode : Icons.dark_mode),
@@ -70,6 +74,7 @@ class _MainLayoutScreenState extends ConsumerState<MainLayoutScreen> {
                   : ThemeMode.dark;
             },
           ),
+          const SizedBox(width: 8),
         ],
       ),
 
@@ -104,6 +109,60 @@ class _MainLayoutScreenState extends ConsumerState<MainLayoutScreen> {
             label: 'Perfil',
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildCreditsPill(BuildContext context, WidgetRef ref) {
+    final saldoAsync = ref.watch(saldoControllerProvider);
+    final theme = ShadTheme.of(context);
+
+    return InkWell(
+      onTap: () => context.push('/buy-credits'),
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.primary.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: theme.colorScheme.primary.withValues(alpha: 0.2),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.token,
+              color: theme.colorScheme.primary,
+              size: 16,
+            ),
+            const SizedBox(width: 6),
+            saldoAsync.when(
+              data: (saldo) => Text(
+                '${saldo?.saldoCreditos ?? 0} SST',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                  color: theme.colorScheme.primary,
+                ),
+              ),
+              loading: () => const SizedBox(
+                height: 10,
+                width: 10,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+              error: (_, __) => Text(
+                '0 SST',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                  color: theme.colorScheme.mutedForeground,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
