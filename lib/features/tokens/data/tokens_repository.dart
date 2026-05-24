@@ -35,10 +35,10 @@ class TokensRepository {
   // Generación de Checkout Session de Stripe
   Future<String> comprarPaquete(String paqueteId) async {
     final response = await _dio.post(
-      '/checkout/session',
-      data: {'paqueteId': paqueteId},
+      '/checkout/crear-sesion',
+      queryParameters: {'paqueteId': paqueteId},
     );
-    return response.data['checkoutUrl'] ?? '';
+    return response.data['sessionUrl'] ?? '';
   }
 }
 

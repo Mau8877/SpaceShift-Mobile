@@ -2,17 +2,85 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
+import '../../data/tokens_repository.dart';
 import '../../domain/paquete_model.dart';
 import '../providers/tokens_controller.dart';
 
-class BuyCreditsScreen extends ConsumerWidget {
+class BuyCreditsScreen extends ConsumerStatefulWidget {
   const BuyCreditsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<BuyCreditsScreen> createState() => _BuyCreditsScreenState();
+}
+
+class _BuyCreditsScreenState extends ConsumerState<BuyCreditsScreen> {
+  String? _loadingPaqueteId;
+
+  Future<void> _iniciarPago(BuildContext context, PaqueteCredito paquete) async {
+    setState(() {
+      _loadingPaqueteId = paquete.id;
+    });
+
+    try {
+      final repository = ref.read(tokensRepositoryProvider);
+      debugPrint("[DEBUG - Stripe] Creando sesión de cobro para el paquete ${paquete.nombrePaquete}");
+      
+      // 1. Obtener la sesión de Stripe desde el backend
+      final checkoutUrl = await repository.comprarPaquete(paquete.id);
+      
+      if (checkoutUrl.isEmpty) {
+        throw Exception("El backend no retornó ninguna URL de sesión válida.");
+      }
+
+      if (!context.mounted) return;
+
+      // 2. Navegar a la WebView de pago seguro y esperar el resultado
+      final result = await context.push<bool>('/payment-webview', extra: checkoutUrl);
+
+      if (!context.mounted) return;
+
+      // 3. Procesar el resultado del pago
+      if (result == true) {
+        // Recargar el saldo actual del usuario reactivamente
+        ref.read(saldoControllerProvider.notifier).refrescarSaldo();
+        
+        ShadToaster.of(context).show(
+          ShadToast(
+            title: const Text('¡Compra Completada!'),
+            description: Text('Se acreditaron exitosamente ${paquete.creditosPaquetes} SST a tu cuenta.'),
+          ),
+        );
+      } else {
+        ShadToaster.of(context).show(
+          const ShadToast.destructive(
+            title: Text('Pago Cancelado'),
+            description: Text('El proceso de compra en Stripe fue cancelado por el usuario.'),
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint("[ERROR - Stripe] Ocurrió un error en el flujo de Stripe: $e");
+      if (context.mounted) {
+        ShadToaster.of(context).show(
+          ShadToast.destructive(
+            title: const Text('Error en el Pago'),
+            description: Text('No pudimos procesar tu solicitud: ${e.toString()}'),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _loadingPaqueteId = null;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final saldoAsync = ref.watch(saldoControllerProvider);
     final paquetesAsync = ref.watch(paquetesCreditoProvider);
-
     final theme = ShadTheme.of(context);
 
     return Scaffold(
@@ -179,6 +247,8 @@ class BuyCreditsScreen extends ConsumerWidget {
       separatorBuilder: (_, __) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
         final paquete = paquetes[index];
+        final isThisLoading = _loadingPaqueteId == paquete.id;
+
         return Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -241,17 +311,18 @@ class BuyCreditsScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 8),
                   ShadButton(
-                    onPressed: () {
-                      ShadToaster.of(context).show(
-                        const ShadToast(
-                          title: Text('Próximamente'),
-                          description: Text(
-                              'El pago con Stripe se habilitará en el siguiente paso de la integración.'),
-                        ),
-                      );
-                    },
+                    onPressed: isThisLoading ? null : () => _iniciarPago(context, paquete),
                     size: ShadButtonSize.sm,
-                    child: const Text('Comprar'),
+                    child: isThisLoading
+                        ? const SizedBox(
+                            width: 14,
+                            height: 14,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
+                          )
+                        : const Text('Comprar'),
                   ),
                 ],
               ),

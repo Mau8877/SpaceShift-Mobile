@@ -15,6 +15,7 @@ import '../../features/chat/presentation/screens/chat_detail_screen.dart';
 import '../../features/properties/presentation/screens/mis_inmuebles_screen.dart';
 import '../../features/tokens/presentation/screens/buy_credits_screen.dart';
 import '../../features/tokens/presentation/screens/credit_history_screen.dart';
+import '../../features/tokens/presentation/screens/payment_webview_screen.dart';
 
 part 'app_router.g.dart';
 
@@ -55,6 +56,13 @@ GoRouter appRouter(Ref ref) {
       GoRoute(
         path: '/credit-history',
         builder: (context, state) => const CreditHistoryScreen(),
+      ),
+      GoRoute(
+        path: '/payment-webview',
+        builder: (context, state) {
+          final url = state.extra as String;
+          return PaymentWebViewScreen(checkoutUrl: url);
+        },
       ),
       GoRoute(
         path: '/create_publication',
