@@ -34,7 +34,8 @@ class Publicacion {
     return Publicacion(
       id: json['id'],
       idUsuario: json['idUsuario'] ?? '',
-      idInmueble: json['idInmueble'] ?? '',
+      idInmueble: json['idInmueble'] ?? 
+                  (json['inmueble'] != null ? json['inmueble']['id'] ?? '' : ''),
       titulo: json['titulo'] ?? '',
       descripcionGeneral: json['descripcionGeneral'] ?? '',
       tipoTransaccion: json['tipoTransaccion'] ?? 'VENTA',

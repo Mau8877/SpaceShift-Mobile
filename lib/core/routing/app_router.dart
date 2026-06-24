@@ -16,6 +16,9 @@ import '../../features/properties/presentation/screens/mis_inmuebles_screen.dart
 import '../../features/tokens/presentation/screens/buy_credits_screen.dart';
 import '../../features/tokens/presentation/screens/credit_history_screen.dart';
 import '../../features/tokens/presentation/screens/payment_webview_screen.dart';
+import '../../features/contratos/presentation/screens/contratos_list_screen.dart';
+import '../../features/contratos/presentation/screens/contrato_detail_screen.dart';
+import '../../features/contratos/presentation/screens/crear_oferta_screen.dart';
 
 part 'app_router.g.dart';
 
@@ -92,6 +95,24 @@ GoRouter appRouter(Ref ref) {
             conversacionId: conversacionId,
             nombreOtroUsuario: nombreOtroUsuario,
           );
+        },
+      ),
+      GoRoute(
+        path: '/contratos',
+        builder: (context, state) => const ContratosListScreen(),
+      ),
+      GoRoute(
+        path: '/contrato_detail',
+        builder: (context, state) {
+          final id = state.extra as String;
+          return ContratoDetailScreen(contratoId: id);
+        },
+      ),
+      GoRoute(
+        path: '/crear-oferta',
+        builder: (context, state) {
+          final pub = state.extra as Publicacion;
+          return CrearOfertaScreen(publicacion: pub);
         },
       ),
     ],

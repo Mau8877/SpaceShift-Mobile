@@ -10,6 +10,7 @@ import 'package:latlong2/latlong.dart';
 import '../../domain/inmueble.dart';
 import '../../domain/publicacion.dart';
 import '../../domain/ubicacion.dart';
+import '../../../contratos/domain/contrato_model.dart';
 import '../providers/create_publication_controller.dart';
 import '../providers/user_properties_provider.dart';
 import '../providers/publicaciones_provider.dart';
@@ -42,6 +43,9 @@ class _CreatePublicationScreenState extends ConsumerState<CreatePublicationScree
   late int banos;
   late int garajes;
   late int antiguedadAnios;
+  late String condiciones;
+  late String multasSanciones;
+  List<DispositivoInmueble> dispositivos = [];
   
   // Ubicación
   late String ciudad;
@@ -71,6 +75,9 @@ class _CreatePublicationScreenState extends ConsumerState<CreatePublicationScree
     banos = inm?.banos ?? 0;
     garajes = inm?.garajes ?? 0;
     antiguedadAnios = inm?.antiguedadAnios ?? 0;
+    condiciones = inm?.condiciones ?? '';
+    multasSanciones = inm?.multasSanciones ?? '';
+    dispositivos = List<DispositivoInmueble>.from(inm?.dispositivos ?? []);
     
     ciudad = ubi?.ciudad ?? '';
     zonaBarrios = ubi?.zonaBarrios ?? '';
@@ -229,6 +236,93 @@ class _CreatePublicationScreenState extends ConsumerState<CreatePublicationScree
                   ),
                 ],
               ),
+
+              const SizedBox(height: 32),
+              _buildSectionTitle('Condiciones y Dispositivos Inteligentes'),
+              ShadInputFormField(
+                label: const Text('Condiciones de Alquiler / Venta'),
+                initialValue: condiciones,
+                minLines: 2,
+                maxLines: 4,
+                placeholder: const Text('Ej. No se permiten mascotas, depósito de garantía...'),
+                onSaved: (v) => condiciones = v ?? '',
+              ),
+              const SizedBox(height: 16),
+              ShadInputFormField(
+                label: const Text('Multas y Sanciones'),
+                initialValue: multasSanciones,
+                minLines: 2,
+                maxLines: 4,
+                placeholder: const Text('Ej. Multa de 50 USD por fumar en el inmueble...'),
+                onSaved: (v) => multasSanciones = v ?? '',
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Dispositivos Inteligentes',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  ShadButton.outline(
+                    onPressed: _showAddDeviceDialog,
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.add, size: 16),
+                        SizedBox(width: 4),
+                        Text('Agregar'),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              if (dispositivos.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  child: Text(
+                    'No hay dispositivos registrados para este inmueble.',
+                    style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic),
+                  ),
+                )
+              else
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: dispositivos.length,
+                  itemBuilder: (context, index) {
+                    final dev = dispositivos[index];
+                    return Card(
+                      margin: const EdgeInsets.symmetric(vertical: 4),
+                      child: ListTile(
+                        leading: const Icon(Icons.devices, color: Colors.blue),
+                        title: Text(dev.nombre, style: const TextStyle(fontWeight: FontWeight.bold)),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (dev.descripcion.isNotEmpty) Text(dev.descripcion),
+                            Text('Precio por día: \$${dev.precio} USD', style: const TextStyle(fontWeight: FontWeight.w500)),
+                            if (dev.maxHorasSeguidas != null && dev.maxHorasSeguidas! > 0)
+                              Text('Máx. horas continuas: ${dev.maxHorasSeguidas}h'),
+                            if (dev.horarioLimiteUso != null && dev.horarioLimiteUso!.isNotEmpty)
+                              Text('Restricción horario: ${dev.horarioLimiteUso} a ${dev.horarioLimiteFin ?? ''}'),
+                            if (dev.sancionIncumplimiento != null && dev.sancionIncumplimiento!.isNotEmpty)
+                              Text('Sanción: ${dev.sancionIncumplimiento}', style: const TextStyle(color: Colors.red)),
+                          ],
+                        ),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: () {
+                            setState(() {
+                              dispositivos.removeAt(index);
+                            });
+                          },
+                        ),
+                      ),
+                    );
+                  },
+                ),
 
               const SizedBox(height: 32),
               _buildSectionTitle('Ubicación'),
@@ -410,6 +504,151 @@ class _CreatePublicationScreenState extends ConsumerState<CreatePublicationScree
     );
   }
 
+  void _showAddDeviceDialog() {
+    final deviceFormKey = GlobalKey<FormState>();
+    String devNombre = '';
+    String devDescripcion = '';
+    double devPrecio = 0.0;
+    int? devMaxHoras;
+    bool hasTimeRestriction = false;
+    String devHorarioLimiteUso = '22:00';
+    String devHorarioLimiteFin = '06:00';
+    String? devSancion;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text('Agregar Dispositivo Inteligente'),
+              content: SingleChildScrollView(
+                child: Form(
+                  key: deviceFormKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextFormField(
+                        decoration: const InputDecoration(labelText: 'Nombre del Dispositivo*'),
+                        validator: (v) => v == null || v.isEmpty ? 'Requerido' : null,
+                        onSaved: (v) => devNombre = v!,
+                      ),
+                      const SizedBox(height: 8),
+                      TextFormField(
+                        decoration: const InputDecoration(labelText: 'Descripción'),
+                        onSaved: (v) => devDescripcion = v ?? '',
+                      ),
+                      const SizedBox(height: 8),
+                      TextFormField(
+                        decoration: const InputDecoration(labelText: 'Precio por Día (USD)*'),
+                        keyboardType: TextInputType.number,
+                        validator: (v) {
+                          if (v == null || v.isEmpty) return 'Requerido';
+                          if (double.tryParse(v) == null) return 'Debe ser un número';
+                          return null;
+                        },
+                        onSaved: (v) => devPrecio = double.parse(v!),
+                      ),
+                      const SizedBox(height: 8),
+                      TextFormField(
+                        decoration: const InputDecoration(
+                          labelText: 'Máx. horas continuas (opcional)',
+                          hintText: 'Ej. 2',
+                        ),
+                        keyboardType: TextInputType.number,
+                        onSaved: (v) => devMaxHoras = v != null && v.isNotEmpty ? int.tryParse(v) : null,
+                      ),
+                      const SizedBox(height: 12),
+                      CheckboxListTile(
+                        title: const Text('Restringir el uso en un horario específico', style: TextStyle(fontSize: 14)),
+                        value: hasTimeRestriction,
+                        contentPadding: EdgeInsets.zero,
+                        onChanged: (val) {
+                          setDialogState(() {
+                            hasTimeRestriction = val ?? false;
+                          });
+                        },
+                      ),
+                      if (hasTimeRestriction) ...[
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextFormField(
+                                initialValue: devHorarioLimiteUso,
+                                decoration: const InputDecoration(
+                                  labelText: 'Desde',
+                                  hintText: 'Ej. 22:00',
+                                ),
+                                validator: (v) => v == null || v.isEmpty ? 'Requerido' : null,
+                                onSaved: (v) => devHorarioLimiteUso = v!,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: TextFormField(
+                                initialValue: devHorarioLimiteFin,
+                                decoration: const InputDecoration(
+                                  labelText: 'Hasta',
+                                  hintText: 'Ej. 06:00',
+                                ),
+                                validator: (v) => v == null || v.isEmpty ? 'Requerido' : null,
+                                onSaved: (v) => devHorarioLimiteFin = v!,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                      const SizedBox(height: 8),
+                      TextFormField(
+                        decoration: const InputDecoration(
+                          labelText: 'Sanción o Multa por Incumplimiento (opcional)',
+                          hintText: 'Ej. Multa de 10 USD',
+                        ),
+                        onSaved: (v) => devSancion = v != null && v.isNotEmpty ? v : null,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Cancelar'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    if (deviceFormKey.currentState!.validate()) {
+                      deviceFormKey.currentState!.save();
+                      final newDevice = DispositivoInmueble(
+                        id: UniqueKey().toString(),
+                        nombre: devNombre,
+                        precio: devPrecio,
+                        tipoPrecio: 'POR_DIA',
+                        configuracionTiempo: 'LIBRE',
+                        horarioInicio: '00:00',
+                        horarioFin: '23:59',
+                        descripcion: devDescripcion,
+                        maxHorasSeguidas: devMaxHoras,
+                        horarioLimiteUso: hasTimeRestriction ? devHorarioLimiteUso : null,
+                        horarioLimiteFin: hasTimeRestriction ? devHorarioLimiteFin : null,
+                        sancionIncumplimiento: devSancion,
+                      );
+                      setState(() {
+                        dispositivos.add(newDevice);
+                      });
+                      Navigator.pop(context);
+                    }
+                  },
+                  child: const Text('Agregar'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   void _submitForm() async {
     if (_formKey.currentState!.validate()) {
       if (images.isEmpty && existingImageUrls.isEmpty) {
@@ -447,6 +686,9 @@ class _CreatePublicationScreenState extends ConsumerState<CreatePublicationScree
           banos: banos,
           garajes: garajes,
           antiguedadAnios: antiguedadAnios,
+          condiciones: condiciones,
+          multasSanciones: multasSanciones,
+          dispositivos: dispositivos,
           ubicacion: Ubicacion(
             id: widget.publicacion?.inmueble?.ubicacion.id,
             ciudad: ciudad,

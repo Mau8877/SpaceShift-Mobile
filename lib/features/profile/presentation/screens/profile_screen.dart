@@ -80,6 +80,12 @@ class ProfileScreen extends ConsumerWidget {
                   child: const Text('Mis Inmuebles'),
                 ),
                 const SizedBox(height: 12),
+                ShadButton.outline(
+                  width: double.infinity,
+                  onPressed: () => context.push('/contratos'),
+                  child: const Text('Mis Contratos'),
+                ),
+                const SizedBox(height: 12),
                 ShadButton(
                   width: double.infinity,
                   onPressed: () => context.push('/profile-edit'),

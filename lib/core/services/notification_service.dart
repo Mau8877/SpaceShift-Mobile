@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -63,13 +64,19 @@ class NotificationService {
   }
 
   Future<void> _registerToken() async {
-    final token = await FirebaseMessaging.instance.getToken();
-    if (token != null) {
-      await _ref.read(notificationApiProvider).registerToken(token);
+    try {
+      final token = await FirebaseMessaging.instance.getToken();
+      if (token != null) {
+        await _ref.read(notificationApiProvider).registerToken(token);
+      }
+      FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
+        _ref.read(notificationApiProvider).registerToken(newToken).catchError((e) {
+          debugPrint('Error actualizando token FCM: $e');
+        });
+      });
+    } catch (e) {
+      debugPrint('Error inicializando Firebase Messaging: $e');
     }
-    FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
-      _ref.read(notificationApiProvider).registerToken(newToken);
-    });
   }
 
   void _listenForeground() {

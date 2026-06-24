@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shadcn_ui/shadcn_ui.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../domain/publicacion.dart';
 
@@ -170,22 +171,39 @@ class PropertyDetailScreen extends StatelessWidget {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: ShadButton(
-          size: ShadButtonSize.lg,
-          width: double.infinity,
-          onPressed: () {
-             ShadToaster.of(context).show(
-              const ShadToast(description: Text('Iniciando contacto con el anunciante...')),
-            );
-          },
-          child: const Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.chat_bubble_outline),
-              SizedBox(width: 10),
-              Text('Contactar ahora', style: TextStyle(fontSize: 16)),
-            ],
-          ),
+        child: Row(
+          children: [
+            Expanded(
+              flex: 2,
+              child: ShadButton.outline(
+                size: ShadButtonSize.lg,
+                onPressed: () {
+                  ShadToaster.of(context).show(
+                    const ShadToast(description: Text('Iniciando contacto con el anunciante...')),
+                  );
+                },
+                child: const Icon(Icons.chat_bubble_outline),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              flex: 5,
+              child: ShadButton(
+                size: ShadButtonSize.lg,
+                onPressed: () {
+                  context.push('/crear-oferta', extra: publicacion);
+                },
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.description_outlined),
+                    SizedBox(width: 8),
+                    Text('Realizar Oferta', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
