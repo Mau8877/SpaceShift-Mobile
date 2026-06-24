@@ -18,3 +18,8 @@ Future<List<Publicacion>> publicaciones(Ref ref) {
     maxPrice: filters.maxPrice,
   );
 }
+
+@riverpod
+Future<List<Publicacion>> misPublicaciones(Ref ref) {
+  return ref.watch(publicacionRepositoryProvider).getMisPublicaciones();
+}

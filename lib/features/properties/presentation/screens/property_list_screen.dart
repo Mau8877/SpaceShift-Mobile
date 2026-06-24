@@ -110,6 +110,40 @@ class PropertyListScreen extends ConsumerWidget {
                             },
                           ),
                         ),
+                        const SizedBox(height: 32),
+
+                        // --- SECTION: All publications (vertical) ---
+                        const Text(
+                          'Todas las publicaciones',
+                          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Explora todo lo disponible',
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: ShadTheme.of(context).colorScheme.mutedForeground,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: publicaciones.length,
+                          itemBuilder: (context, index) {
+                            final pub = publicaciones[index];
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 16),
+                              child: SizedBox(
+                                height: 380,
+                                child: PropertyCard(
+                                  publicacion: pub,
+                                  onTap: () => context.push('/property_detail', extra: pub),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
                         const SizedBox(height: 80),
                       ],
                     );

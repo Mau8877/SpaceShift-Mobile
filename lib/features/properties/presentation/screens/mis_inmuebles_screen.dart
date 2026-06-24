@@ -6,13 +6,14 @@ import 'package:shadcn_ui/shadcn_ui.dart';
 import '../providers/publicaciones_provider.dart';
 import '../../domain/publicacion.dart';
 import '../../data/publicacion_repository.dart';
+import '../../../videos/presentation/widgets/video_upload_dialog.dart';
 
 class MisInmueblesScreen extends ConsumerWidget {
   const MisInmueblesScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final userPropsAsync = ref.watch(publicacionesProvider);
+    final userPropsAsync = ref.watch(misPublicacionesProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -92,15 +93,17 @@ class MisInmueblesScreen extends ConsumerWidget {
                   style: TextStyle(color: ShadTheme.of(context).colorScheme.primary),
                 ),
                 const SizedBox(height: 8),
-                Row(
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
                   children: [
                     ShadButton.outline(
                       size: ShadButtonSize.sm,
                       onPressed: () {
-                        // Navegar a edición (reutilizando la pantalla de creación)
                         context.push('/create_publication', extra: pub);
                       },
                       child: const Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(Icons.edit, size: 14),
                           SizedBox(width: 4),
@@ -108,13 +111,28 @@ class MisInmueblesScreen extends ConsumerWidget {
                         ],
                       ),
                     ),
-                    const SizedBox(width: 8),
                     ShadButton.destructive(
                       size: ShadButtonSize.sm,
                       onPressed: () {
                          _confirmDelete(context, pub, ref);
                       },
                       child: const Icon(Icons.delete_outline, size: 14),
+                    ),
+                    ShadButton(
+                      size: ShadButtonSize.sm,
+                      onPressed: () {
+                        if (pub.id != null) {
+                          showVideoUploadFlow(context, ref, pub.id!);
+                        }
+                      },
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.video_call, size: 14),
+                          SizedBox(width: 4),
+                          Text('3D'),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -144,7 +162,7 @@ class MisInmueblesScreen extends ConsumerWidget {
                 await (repository as dynamic).deletePublicacion(pub.id!);
                 
                 // Refrescamos las listas
-                ref.invalidate(publicacionesProvider);
+                ref.invalidate(misPublicacionesProvider);
                 
                 if (context.mounted) {
                   Navigator.of(context).pop(); // Cerramos el diálogo

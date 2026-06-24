@@ -13,6 +13,7 @@ import '../../profile/presentation/screens/profile_screen.dart';
 import '../../chat/presentation/screens/bandeja_entrada_screen.dart';
 import '../../properties/presentation/screens/favoritos_screen.dart';
 import '../../tokens/presentation/providers/tokens_controller.dart';
+import '../../videos/presentation/providers/video_upload_controller.dart';
 
 class MainLayoutScreen extends ConsumerStatefulWidget {
   const MainLayoutScreen({super.key});
@@ -80,7 +81,14 @@ class _MainLayoutScreenState extends ConsumerState<MainLayoutScreen> {
 
       // IndexedStack mantiene vivas las pantallas en memoria.
       // Si haces scroll en las casas y vas al perfil, al volver el scroll sigue ahí.
-      body: IndexedStack(index: _currentIndex, children: _screens),
+      body: Column(
+        children: [
+          _buildUploadProgressBanner(context, ref),
+          Expanded(
+            child: IndexedStack(index: _currentIndex, children: _screens),
+          ),
+        ],
+      ),
 
       // Usamos el NavigationBar nativo de Material 3 que es súper elegante
       bottomNavigationBar: NavigationBar(
@@ -163,6 +171,75 @@ class _MainLayoutScreenState extends ConsumerState<MainLayoutScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildUploadProgressBanner(BuildContext context, WidgetRef ref) {
+    final uploadState = ref.watch(videoUploadControllerProvider);
+    
+    if (!uploadState.isUploading && !uploadState.completed && uploadState.error == null) {
+      return const SizedBox.shrink();
+    }
+    
+    if (uploadState.completed) {
+      return Container(
+        color: Colors.green.shade100,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Row(
+          children: [
+            const Icon(Icons.check_circle, color: Colors.green),
+            const SizedBox(width: 8),
+            const Expanded(child: Text('Video subido correctamente. Procesando en el servidor...')),
+            IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: () => ref.read(videoUploadControllerProvider.notifier).reset(),
+            )
+          ],
+        ),
+      );
+    }
+    
+    if (uploadState.error != null) {
+      return Container(
+        color: Colors.red.shade100,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Row(
+          children: [
+            const Icon(Icons.error, color: Colors.red),
+            const SizedBox(width: 8),
+            Expanded(child: Text('Error al subir: ${uploadState.error}')),
+            IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: () => ref.read(videoUploadControllerProvider.notifier).reset(),
+            )
+          ],
+        ),
+      );
+    }
+
+    return Container(
+      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.cloud_upload, size: 20),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Subiendo video y preparando modelo 3D...',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+                ),
+              ),
+              Text('${(uploadState.progress * 100).toStringAsFixed(1)}%'),
+            ],
+          ),
+          const SizedBox(height: 8),
+          LinearProgressIndicator(value: uploadState.progress),
+        ],
       ),
     );
   }
